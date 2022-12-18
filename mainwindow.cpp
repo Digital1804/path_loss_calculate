@@ -1,9 +1,13 @@
 #include "mainwindow.h"
+#include <iostream>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
-    int map_size = 1000;
     QGraphicsScene* scene = new QGraphicsScene();
-    QPixmap map(map_size, map_size);
+    QPixmap map;
+    QImage map_copy;
+    map_copy.load("C:/Users/yarob/Desktop/room.png");
+    map.load("C:/Users/yarob/Desktop/room.png");
+    int map_size = map.height();
     QPainter p(&map);
     QColor array[200];
     for (int i = 0; i < 200; i++) {
@@ -24,10 +28,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         else if (i < 110) array[i] = QColor(19, 10, 97);
         else array[i] = QColor(0, 0, 0);
     }
-
+    QColor col;
     for(int i = 0; i < map_size; i++){
         for(int j = 0; j < map_size; j++){
-            p.setPen(array[(int)getDBm(i + 1, j + 1, 350, 400)]);
+            int DBm = (int)getDBm(i + 1, j + 1, 150, 200);
+            col = map_copy.pixelColor(i, j);
+            if (col == QColor(0,0,0))
+                 DBm+=30;
+            p.setPen(array[DBm]);
             p.drawPoint(i, j);
         }
     }
@@ -46,7 +54,7 @@ double MainWindow::getDBm (int i, int j, int x, int y) {
     int a = qAbs(x - i), b = qAbs(y - j);
 
     double dist = qSqrt(a * a + b * b);
-    double break_point = (2 * 3.14 * 5000000000) / (3 * qPow(10, 8));
+    double break_point = (2 * 3.14 * 150*10*5*pow(10,9)) / (3 * qPow(10, 8));
     double h = 5;
     if (dist < 10)
         return 1;

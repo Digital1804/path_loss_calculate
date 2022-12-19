@@ -1,12 +1,11 @@
 #include "mainwindow.h"
-#include <iostream>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     QGraphicsScene* scene = new QGraphicsScene();
     QPixmap map;
     QImage map_copy;
-    map_copy.load("C:/Users/yarob/Desktop/room.png");
-    map.load("C:/Users/yarob/Desktop/room.png");
+    map_copy.load("C:/Users/yarob/Desktop/room1.jpg");
+    map.load("C:/Users/yarob/Desktop/room1.jpg");
     int map_size = map.height();
     QPainter p(&map);
     QColor array[200];
@@ -29,12 +28,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         else array[i] = QColor(0, 0, 0);
     }
     QColor col;
+    int DBm;
     for(int i = 0; i < map_size; i++){
         for(int j = 0; j < map_size; j++){
-            int DBm = (int)getDBm(i + 1, j + 1, 150, 200);
             col = map_copy.pixelColor(i, j);
             if (col == QColor(0,0,0))
-                 DBm+=30;
+                 DBm=199;
+            else{
+                DBm = (int)getDBm(i, j, 20, 390);
+                int wloss = countWalls(i, j, 20, 390, map_copy);
+                if (DBm>wloss)
+                    DBm+=wloss;
+            }
             p.setPen(array[DBm]);
             p.drawPoint(i, j);
         }
@@ -46,6 +51,55 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setCentralWidget(view);
 }
 
+double MainWindow::countWalls(int x1, int y1, int x, int y, QImage map_copy){
+    QColor col;
+    int a=x1,b=x,c=y1,d=y, DBm=0;
+    while (1){
+        if (x1<x){
+            if (a<b){
+                a++;
+            }
+            if (y1<y){
+                if (c<d)
+                    c++;
+            }
+            else if (y1>y){
+                if (c>d)
+                    c--;
+            }
+        }
+        else if (x1>x){
+            if (a>b){
+                a--;
+            }
+            if (y1<y){
+                if (c<d)
+                    c++;
+            }
+            else if (y1>y){
+                if (c>d)
+                    c--;
+            }
+        }
+        if (x1==x){
+            if (y1<y){
+                if (c<d)
+                    c++;
+            }
+            else if (y1>y){
+                if (c>d)
+                    c--;
+            }
+        }
+        if ((a==b) && (c==d))
+            break;
+        col = map_copy.pixelColor(a, c);
+        if (col == QColor(0,0,0))
+             DBm+=1;
+    }
+    return DBm;
+}
+
 double MainWindow::calcDBm (double dist, double h) {
     return (20 * (log10((40 * 3.14 * dist * 5) / 3)) + qMin(0.03 * pow(h, 1.72), 10.0) * log10(dist) - qMin(0.044 * pow(h, 1.72), 14.77) + (0.002 * log10(h) * dist));
 }
@@ -54,8 +108,8 @@ double MainWindow::getDBm (int i, int j, int x, int y) {
     int a = qAbs(x - i), b = qAbs(y - j);
 
     double dist = qSqrt(a * a + b * b);
-    double break_point = (2 * 3.14 * 150*10*5*pow(10,9)) / (3 * qPow(10, 8));
-    double h = 5;
+    double break_point = (2 * 3.14 * 1.5 * 1.5 * 5 * pow(10,9)) / (3 * qPow(10, 8));
+    double h = 1;
     if (dist < 10)
         return 1;
     else if (dist >= 10.0 && dist <= break_point)

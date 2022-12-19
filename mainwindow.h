@@ -18,6 +18,7 @@ class MainWindow : public QMainWindow {
 
 public slots:
     double getDBm (int i, int j, int x, int y);
+    double countWalls(int i, int j, int x, int y, QImage map_copy);
     double calcDBm (double dist, double h);
 public:
     MainWindow(QWidget *parent = nullptr);
